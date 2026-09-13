@@ -2,37 +2,93 @@
 @model IndexModel
 @{
     ViewData["Title"] = "Metar Reader";
+    var defaultAirport = Model.Airports.FirstOrDefault();
 }
 
-<div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
-        <h1 class="mb-3">Metar Reader</h1>
-        <p class="text-muted">Pick an airport to get its current weather, translated from METAR into plain English.</p>
-
-        <div class="input-group mb-3">
-            <select id="airport-select" class="form-select" aria-label="Airport">
-                @foreach (var airport in Model.Airports)
-                {
-                    <option value="@airport.IcaoId">@airport.DisplayName</option>
-                }
-            </select>
-            <button id="get-weather-btn" class="btn btn-primary" type="button">Get Weather</button>
+<div class="stage">
+    <div class="unit">
+        <div class="unit-header">
+            <div class="unit-id"><span class="led"></span> METAR&nbsp;READER &middot; WX BRIEF UNIT</div>
+            <div class="unit-clock" id="clock" aria-hidden="true">--:--:--Z</div>
         </div>
 
-        <div id="loading-indicator" class="text-muted mb-3" hidden>Fetching weather…</div>
+        <div class="unit-header unit-header--tight">
+            <span class="unit-clock">PANEL BRIGHTNESS</span>
+            <div class="brightness" role="group" aria-label="Panel brightness theme">
+                <button type="button" class="bright-opt" data-theme-choice="day">DAY</button>
+                <button type="button" class="bright-opt" data-theme-choice="night">NIGHT</button>
+                <button type="button" class="bright-opt" data-theme-choice="auto">AUTO</button>
+            </div>
+        </div>
 
-        <div id="error-banner" class="alert alert-danger" role="alert" hidden></div>
+        <div class="screen">
+            <div class="tuner">
+                <div class="picker" id="picker">
+                    <button type="button" class="picker-face" id="pickerFace" aria-haspopup="listbox" aria-expanded="false">
+                        <span class="code" id="pickerCode">@defaultAirport?.IcaoId</span>
+                        <span class="place" id="pickerPlace">@defaultAirport?.City</span>
+                        <span class="chevron"></span>
+                    </button>
+                    <ul class="listbox" id="listbox" role="listbox">
+                        @foreach (var airport in Model.Airports)
+                        {
+                            <li class="option" role="option" data-icao="@airport.IcaoId" data-place="@airport.City" data-station="@airport.Name">
+                                <span class="code">@airport.IcaoId</span>
+                                <span class="place">@airport.Name</span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+                <button type="button" class="brief-btn" id="briefBtn">Brief</button>
+            </div>
 
-        <div id="result-card" class="card" hidden>
-            <div class="card-body">
-                <h2 id="station-name" class="card-title h5"></h2>
-                <p id="summary-text" class="card-text fs-5"></p>
-                <ul id="details-list" class="list-unstyled text-muted small"></ul>
-                <p class="text-muted small" id="observed-at"></p>
+            <div class="scan" id="scan"></div>
 
-                <details class="mt-2">
-                    <summary class="text-muted small">Raw METAR</summary>
-                    <code id="raw-metar" class="d-block mt-1"></code>
+            <div id="error-banner" class="caution-strip caution-strip--banner" role="alert" hidden></div>
+
+            <div class="readout" id="readout" hidden>
+                <div class="header-row">
+                    <div class="station">
+                        <span class="name" id="stationName"></span>
+                        <span class="obs" id="obsTime"></span>
+                    </div>
+                    <span class="cat-badge" id="catBadge">VFR</span>
+                </div>
+
+                <div class="instruments">
+                    <div class="dial-wrap">
+                        <span class="dial-label">Wind</span>
+                        <div class="dial">
+                            <svg width="132" height="132" viewBox="0 0 132 132">
+                                <circle class="ring" cx="66" cy="66" r="58"></circle>
+                                <g id="ticks"></g>
+                                <text class="cardinal" x="66" y="17" text-anchor="middle">N</text>
+                                <text class="cardinal" x="118" y="70" text-anchor="middle">E</text>
+                                <text class="cardinal" x="66" y="123" text-anchor="middle">S</text>
+                                <text class="cardinal" x="14" y="70" text-anchor="middle">W</text>
+                                <g class="needle" id="needle">
+                                    <line class="needle-line" x1="66" y1="66" x2="66" y2="24"></line>
+                                </g>
+                                <circle class="hub" cx="66" cy="66" r="4"></circle>
+                                <text class="spd" id="dialSpeed" x="66" y="95" text-anchor="middle">0</text>
+                                <text class="unit-txt" x="66" y="106" text-anchor="middle">MPH</text>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="tiles">
+                        <div class="tile"><span class="k">Temp</span><span class="v" id="tTemp">&mdash;</span></div>
+                        <div class="tile"><span class="k">Visibility</span><span class="v" id="tVis">&mdash;</span></div>
+                        <div class="tile"><span class="k">Ceiling</span><span class="v" id="tCeil">&mdash;</span></div>
+                        <div class="tile"><span class="k">Altimeter</span><span class="v" id="tAlt">&mdash;</span></div>
+                    </div>
+                </div>
+
+                <p class="voice" id="voiceLine"></p>
+
+                <details class="raw">
+                    <summary>Raw METAR</summary>
+                    <div class="datalink" id="rawMetar"></div>
                 </details>
             </div>
         </div>

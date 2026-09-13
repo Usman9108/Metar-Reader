@@ -31,7 +31,28 @@ public static class MetarDecoder
 
         var stationName = string.IsNullOrWhiteSpace(obs.StationName) ? obs.IcaoId : obs.StationName!;
 
-        return new DecodedMetarReport(stationName, summary, details, obs.RawText, obs.ObservedAtUtc);
+        var visibilityMiles = VisibilityParser.ParseMiles(obs.VisibilityRaw);
+        var ceilingFeet = SkyConditionDecoder.GetCeilingFeet(obs.Clouds);
+        var flightCategory = FlightCategoryClassifier.Classify(ceilingFeet, visibilityMiles);
+        var windSpeedMph = UnitConversions.KnotsToMph(obs.WindSpeedKt ?? 0);
+
+        return new DecodedMetarReport(
+            stationName,
+            summary,
+            details,
+            obs.RawText,
+            obs.ObservedAtUtc,
+            flightCategory,
+            SkyConditionDecoder.Describe(obs.Clouds),
+            obs.TempC is { } t ? UnitConversions.CelsiusToFahrenheit(t) : null,
+            obs.WindDirectionDegrees,
+            obs.IsVariableWind,
+            windSpeedMph,
+            obs.WindGustKt is { } g ? UnitConversions.KnotsToMph(g) : null,
+            visibilityMiles,
+            VisibilityParser.Parse(obs.VisibilityRaw),
+            ceilingFeet,
+            obs.AltimeterHpa is { } hpa ? UnitConversions.HectopascalsToInchesOfMercury(hpa) : null);
     }
 
     private static string BuildWindPhrase(MetarObservation obs)

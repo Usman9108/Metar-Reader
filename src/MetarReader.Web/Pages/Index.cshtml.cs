@@ -41,11 +41,23 @@ public class IndexModel(IAviationWeatherClient weatherClient, ILogger<IndexModel
             return new JsonResult(new
             {
                 success = true,
+                icaoId = observation.IcaoId,
                 stationName = report.StationName,
                 summary = report.Summary,
+                skyPhrase = report.SkyPhrase,
                 details = report.Details,
                 rawMetar = report.RawMetar,
                 observedAtUtc = report.ObservedAtUtc.ToString("u"),
+                flightCategory = report.FlightCategory.ToString().ToUpperInvariant(),
+                tempF = report.TempF,
+                windDirectionDegrees = report.WindDirectionDegrees,
+                isVariableWind = report.IsVariableWind,
+                windSpeedMph = report.WindSpeedMph,
+                windGustMph = report.WindGustMph,
+                visibilityMiles = report.VisibilityMiles,
+                visibilityPhrase = report.VisibilityPhrase,
+                ceilingFeet = report.CeilingFeet,
+                altimeterInHg = report.AltimeterInHg,
             });
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException)

@@ -18,6 +18,20 @@ public static class SkyConditionDecoder
         ["VV"] = 5,
     };
 
+    /// <summary>
+    /// The aviation "ceiling" — the base of the lowest broken/overcast/obscured layer,
+    /// or null if the sky has no ceiling (clear, or only scattered/few clouds).
+    /// </summary>
+    public static int? GetCeilingFeet(IReadOnlyList<CloudLayer> clouds)
+    {
+        var ceilingLayerBases = clouds
+            .Where(c => CoverRank.TryGetValue(c.Cover, out var rank) && rank >= CoverRank["BKN"] && c.BaseFeet.HasValue)
+            .Select(c => c.BaseFeet!.Value)
+            .ToList();
+
+        return ceilingLayerBases.Count == 0 ? null : ceilingLayerBases.Min();
+    }
+
     public static string Describe(IReadOnlyList<CloudLayer> clouds)
     {
         var significant = clouds

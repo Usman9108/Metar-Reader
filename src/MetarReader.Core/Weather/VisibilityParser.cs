@@ -33,6 +33,18 @@ public static class VisibilityParser
         return orMore ? $"{FormatMiles(text)} {unit} or more" : $"{FormatMiles(text)} {unit}";
     }
 
+    /// <summary>Returns the visibility in statute miles as a number, or null if unparseable.</summary>
+    public static double? ParseMiles(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return null;
+        }
+
+        var text = raw.Trim().TrimEnd('+');
+        return TryParseMiles(text, out var miles) ? miles : null;
+    }
+
     private static bool TryParseMiles(string text, out double miles)
     {
         var parts = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);

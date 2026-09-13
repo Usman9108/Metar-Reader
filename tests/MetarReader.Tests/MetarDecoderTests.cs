@@ -28,6 +28,11 @@ public class MetarDecoderTests
         Assert.Contains("Visibility: 10 miles or more", report.Details);
         Assert.Contains(report.Details, d => d.StartsWith("Altimeter: 30.10 inHg"));
         Assert.Equal("KHIO 011855Z 32004KT 10SM CLR 16/10 A3010", report.RawMetar);
+        Assert.Equal(FlightCategory.Vfr, report.FlightCategory);
+        Assert.Equal(60, report.TempF);
+        Assert.Equal(5, report.WindSpeedMph);
+        Assert.Null(report.CeilingFeet);
+        Assert.Equal(30.10, report.AltimeterInHg!.Value, 2);
     }
 
     [Fact]
@@ -69,6 +74,10 @@ public class MetarDecoderTests
             "Overcast at 1,200 ft with light rain, 50°F, wind 14 mph from the south, gusting to 23 mph.",
             report.Summary);
         Assert.Contains("Weather: light rain", report.Details);
+        Assert.Equal(FlightCategory.Mvfr, report.FlightCategory);
+        Assert.Equal(1200, report.CeilingFeet);
+        Assert.Equal(3.0, report.VisibilityMiles);
+        Assert.Equal(23, report.WindGustMph);
     }
 
     [Fact]
