@@ -1,0 +1,40 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Metar Reader";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <h1 class="mb-3">Metar Reader</h1>
+        <p class="text-muted">Pick an airport to get its current weather, translated from METAR into plain English.</p>
+
+        <div class="input-group mb-3">
+            <select id="airport-select" class="form-select" aria-label="Airport">
+                @foreach (var airport in Model.Airports)
+                {
+                    <option value="@airport.IcaoId">@airport.DisplayName</option>
+                }
+            </select>
+            <button id="get-weather-btn" class="btn btn-primary" type="button">Get Weather</button>
+        </div>
+
+        <div id="loading-indicator" class="text-muted mb-3" hidden>Fetching weather…</div>
+
+        <div id="error-banner" class="alert alert-danger" role="alert" hidden></div>
+
+        <div id="result-card" class="card" hidden>
+            <div class="card-body">
+                <h2 id="station-name" class="card-title h5"></h2>
+                <p id="summary-text" class="card-text fs-5"></p>
+                <ul id="details-list" class="list-unstyled text-muted small"></ul>
+                <p class="text-muted small" id="observed-at"></p>
+
+                <details class="mt-2">
+                    <summary class="text-muted small">Raw METAR</summary>
+                    <code id="raw-metar" class="d-block mt-1"></code>
+                </details>
+            </div>
+        </div>
+    </div>
+</div>
