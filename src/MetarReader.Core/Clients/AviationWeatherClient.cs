@@ -7,10 +7,17 @@ namespace MetarReader.Core.Clients;
 /// Talks to aviationweather.gov's data API
 /// (https://aviationweather.gov/api/data/metar?ids=...&amp;format=json).
 /// </summary>
+/// <param name="httpClient">
+/// The <see cref="HttpClient"/> used to call the API. Its <see cref="HttpClient.BaseAddress"/>
+/// should be set to aviationweather.gov's base URL by the caller (typically via
+/// <c>IHttpClientFactory</c> registration).
+/// </param>
 public sealed class AviationWeatherClient(HttpClient httpClient) : IAviationWeatherClient
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
+    /// <inheritdoc />
+    /// <exception cref="HttpRequestException">The HTTP request failed or returned a non-success status code.</exception>
     public async Task<MetarObservation?> GetLatestMetarAsync(string icaoId, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(icaoId);
@@ -37,6 +44,7 @@ public sealed class AviationWeatherClient(HttpClient httpClient) : IAviationWeat
         return Map(latest);
     }
 
+    /// <summary>Converts a raw API record into the app's normalized <see cref="MetarObservation"/> model.</summary>
     private static MetarObservation Map(AviationWeatherApiRecord record)
     {
         var (windDirectionDegrees, isVariableWind) = ParseWindDirection(record.Wdir);
@@ -68,6 +76,10 @@ public sealed class AviationWeatherClient(HttpClient httpClient) : IAviationWeat
             record.RawOb ?? string.Empty);
     }
 
+    /// <summary>
+    /// Reads the API's "wdir" field, which is a plain number of degrees, or the
+    /// string "VRB" when the reported wind direction is variable.
+    /// </summary>
     private static (int? Degrees, bool IsVariable) ParseWindDirection(JsonElement element)
     {
         switch (element.ValueKind)
@@ -87,6 +99,7 @@ public sealed class AviationWeatherClient(HttpClient httpClient) : IAviationWeat
         }
     }
 
+    /// <summary>Reads the API's "visib" field, which is either a number or a string (e.g. "10+", "1/2").</summary>
     private static string? ParseVisibility(JsonElement element) => element.ValueKind switch
     {
         JsonValueKind.Number => element.GetRawText(),

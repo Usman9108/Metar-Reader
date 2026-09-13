@@ -9,6 +9,9 @@ namespace MetarReader.Core.Weather;
 /// </summary>
 public static class VisibilityParser
 {
+    /// <summary>Renders the raw visibility value as a plain-English phrase, e.g. "10 miles or more".</summary>
+    /// <param name="raw">The raw "visib" value from the API, or null if not reported.</param>
+    /// <returns>A plain-English visibility phrase, or "unknown" if <paramref name="raw"/> is missing or unparseable.</returns>
     public static string Parse(string? raw)
     {
         if (string.IsNullOrWhiteSpace(raw))
@@ -34,6 +37,8 @@ public static class VisibilityParser
     }
 
     /// <summary>Returns the visibility in statute miles as a number, or null if unparseable.</summary>
+    /// <param name="raw">The raw "visib" value from the API, or null if not reported.</param>
+    /// <returns>The visibility in statute miles, or null if <paramref name="raw"/> is missing or unparseable.</returns>
     public static double? ParseMiles(string? raw)
     {
         if (string.IsNullOrWhiteSpace(raw))
@@ -45,6 +50,7 @@ public static class VisibilityParser
         return TryParseMiles(text, out var miles) ? miles : null;
     }
 
+    /// <summary>Parses whole numbers, simple fractions ("1/2"), and mixed numbers ("1 1/4") into a mile count.</summary>
     private static bool TryParseMiles(string text, out double miles)
     {
         var parts = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);

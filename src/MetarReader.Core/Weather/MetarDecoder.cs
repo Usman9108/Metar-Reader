@@ -6,6 +6,13 @@ namespace MetarReader.Core.Weather;
 /// <summary>Composes the individual decoders into a full plain-English report.</summary>
 public static class MetarDecoder
 {
+    /// <summary>
+    /// Translates a raw <see cref="MetarObservation"/> into a <see cref="DecodedMetarReport"/>:
+    /// a plain-English summary and details, plus the structured values (flight category, wind,
+    /// ceiling, etc.) the UI needs to render them.
+    /// </summary>
+    /// <param name="obs">The observation to decode.</param>
+    /// <returns>The decoded, plain-English report.</returns>
     public static DecodedMetarReport Decode(MetarObservation obs)
     {
         var wxPhrases = WeatherPhenomenaDecoder.Decode(obs.WxString);
@@ -55,6 +62,7 @@ public static class MetarDecoder
             obs.AltimeterHpa is { } hpa ? UnitConversions.HectopascalsToInchesOfMercury(hpa) : null);
     }
 
+    /// <summary>Builds the wind clause of the summary sentence, e.g. "wind 12 mph from the southeast, gusting to 20 mph".</summary>
     private static string BuildWindPhrase(MetarObservation obs)
     {
         if ((obs.WindSpeedKt ?? 0) == 0)
@@ -77,6 +85,7 @@ public static class MetarDecoder
         return phrase;
     }
 
+    /// <summary>Builds the supplementary detail lines shown alongside the summary sentence.</summary>
     private static List<string> BuildDetails(MetarObservation obs, IReadOnlyList<string> wxPhrases)
     {
         var details = new List<string>
@@ -100,6 +109,7 @@ public static class MetarDecoder
         return details;
     }
 
+    /// <summary>Joins a list of phrases with commas and a trailing "and", e.g. "rain, fog, and haze".</summary>
     private static string JoinNatural(IReadOnlyList<string> items) => items.Count switch
     {
         0 => string.Empty,

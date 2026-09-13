@@ -7,6 +7,7 @@ namespace MetarReader.Core.Weather;
 /// </summary>
 public static class WeatherPhenomenaDecoder
 {
+    /// <summary>Exact-match phrases for multi-part codes (descriptor + phenomenon) that read better as a set unit.</summary>
     private static readonly Dictionary<string, string> FullCodePhrases = new(StringComparer.OrdinalIgnoreCase)
     {
         ["TSRA"] = "thunderstorms with rain",
@@ -32,6 +33,7 @@ public static class WeatherPhenomenaDecoder
         ["SH"] = "rain showers",
     };
 
+    /// <summary>Plain-English phrases for individual two-letter phenomenon codes.</summary>
     private static readonly Dictionary<string, string> PhenomenaPhrases = new(StringComparer.OrdinalIgnoreCase)
     {
         ["DZ"] = "drizzle",
@@ -58,6 +60,9 @@ public static class WeatherPhenomenaDecoder
         ["DS"] = "a duststorm",
     };
 
+    /// <summary>Decodes a METAR present-weather string into one plain-English phrase per space-separated token.</summary>
+    /// <param name="wxString">The raw present-weather codes (e.g. "-RA BR"), or null if none were reported.</param>
+    /// <returns>One phrase per token, e.g. ["light rain", "mist"]. Empty if <paramref name="wxString"/> is null or blank.</returns>
     public static IReadOnlyList<string> Decode(string? wxString)
     {
         if (string.IsNullOrWhiteSpace(wxString))
@@ -80,6 +85,7 @@ public static class WeatherPhenomenaDecoder
         return phrases;
     }
 
+    /// <summary>Decodes one present-weather token, e.g. "-TSRA" or "VCSH", into a single phrase.</summary>
     private static string? DecodeToken(string token)
     {
         if (token.Equals("NSW", StringComparison.OrdinalIgnoreCase))
@@ -130,6 +136,7 @@ public static class WeatherPhenomenaDecoder
         return intensity is null ? body : $"{intensity} {body}";
     }
 
+    /// <summary>Falls back to greedily splitting an unrecognized token into known two-letter codes.</summary>
     private static List<string> DecomposeIntoKnownCodes(string remaining)
     {
         var parts = new List<string>();

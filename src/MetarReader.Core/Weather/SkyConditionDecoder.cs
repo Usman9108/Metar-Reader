@@ -5,10 +5,13 @@ namespace MetarReader.Core.Weather;
 /// <summary>Translates the METAR cloud layer list into a plain-English sky description.</summary>
 public static class SkyConditionDecoder
 {
+    /// <summary>Coverage codes that mean a clear sky rather than an actual cloud layer.</summary>
     private static readonly HashSet<string> ClearCodes = new(StringComparer.OrdinalIgnoreCase) { "SKC", "CLR", "NCD" };
 
-    // Higher rank = more significant when several layers are reported; the
-    // most significant layer governs the overall sky description.
+    /// <summary>
+    /// Higher rank = more significant when several layers are reported; the
+    /// most significant layer governs the overall sky description.
+    /// </summary>
     private static readonly Dictionary<string, int> CoverRank = new(StringComparer.OrdinalIgnoreCase)
     {
         ["FEW"] = 1,
@@ -22,6 +25,8 @@ public static class SkyConditionDecoder
     /// The aviation "ceiling" — the base of the lowest broken/overcast/obscured layer,
     /// or null if the sky has no ceiling (clear, or only scattered/few clouds).
     /// </summary>
+    /// <param name="clouds">The reported sky condition layers.</param>
+    /// <returns>The ceiling height in feet, or null if there is no ceiling.</returns>
     public static int? GetCeilingFeet(IReadOnlyList<CloudLayer> clouds)
     {
         var ceilingLayerBases = clouds
@@ -32,6 +37,9 @@ public static class SkyConditionDecoder
         return ceilingLayerBases.Count == 0 ? null : ceilingLayerBases.Min();
     }
 
+    /// <summary>Describes the overall sky condition in plain English, e.g. "Overcast at 1,200 ft".</summary>
+    /// <param name="clouds">The reported sky condition layers.</param>
+    /// <returns>A plain-English sky description, driven by the most significant layer.</returns>
     public static string Describe(IReadOnlyList<CloudLayer> clouds)
     {
         var significant = clouds

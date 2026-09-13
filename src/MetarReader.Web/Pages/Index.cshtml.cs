@@ -7,16 +7,27 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace MetarReader.Web.Pages;
 
+/// <summary>Backs the Metar Reader home page: the airport picker and its weather-briefing AJAX endpoint.</summary>
+/// <param name="weatherClient">Fetches current METAR observations from aviationweather.gov.</param>
+/// <param name="logger">Logs failures reaching the upstream weather service.</param>
 public class IndexModel(IAviationWeatherClient weatherClient, ILogger<IndexModel> logger) : PageModel
 {
+    /// <summary>The airports offered in the picker.</summary>
     public IReadOnlyList<Airport> Airports { get; private set; } = [];
 
+    /// <summary>Loads the airport catalog for the picker.</summary>
     public void OnGet()
     {
         Airports = AirportCatalog.All;
     }
 
     /// <summary>AJAX endpoint backing the airport picker: GET ?handler=Weather&amp;icao=KHIO</summary>
+    /// <param name="icao">The selected airport's four-letter ICAO identifier.</param>
+    /// <param name="cancellationToken">A token that cancels the request if the client disconnects.</param>
+    /// <returns>
+    /// A JSON payload with <c>success: true</c> and the decoded weather report, or
+    /// <c>success: false</c> and a user-facing <c>error</c> message.
+    /// </returns>
     public async Task<JsonResult> OnGetWeatherAsync(string icao, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(icao))

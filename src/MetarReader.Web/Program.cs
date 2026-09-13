@@ -5,6 +5,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 
+// Registers AviationWeatherClient with a pooled, pre-configured HttpClient so
+// IAviationWeatherClient can simply be constructor-injected wherever it's needed.
 builder.Services.AddHttpClient<IAviationWeatherClient, AviationWeatherClient>(client =>
 {
     client.BaseAddress = new Uri("https://aviationweather.gov/");

@@ -9,6 +9,7 @@ namespace MetarReader.Core.Data;
 /// </summary>
 public static class AirportCatalog
 {
+    /// <summary>All airports available in the picker, in display order.</summary>
     public static IReadOnlyList<Airport> All { get; } =
     [
         new("KHIO", "Portland, OR", "Portland-Hillsboro Airport"),
