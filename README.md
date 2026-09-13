@@ -101,3 +101,7 @@ aviationweather.gov reports METARs for.
 Weather data is provided by the U.S. National Weather Service's
 [Aviation Weather Center API](https://aviationweather.gov/data/api/).
 This project is not affiliated with or endorsed by the NWS or FAA.
+
+## License
+
+[MIT](LICENSE)
